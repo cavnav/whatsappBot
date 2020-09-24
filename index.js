@@ -1,7 +1,9 @@
 const fs = require('fs');
+const find = require('find');
 const puppeteer = require('puppeteer');
 
 const credentialsFile = 'credentials.json';
+const folderShared = 'E:\\projects\\docsF-photo2\\shared';
 
 (async () => {
   const browser = await puppeteer.launch({
@@ -44,17 +46,20 @@ const credentialsFile = 'credentials.json';
   const btnAttach = await page.$('div[role="button"][title="Attach"]');
   await btnAttach.click();
   await delay(1000);
-  const attachImage = await page.$('span[data-icon="attach-image-old"] +input[type=file][multiple]');
-  // await attachImage.click();
-  // await delay(1000);
-  // await page.waitForSelector('.file-dialog-trigger')
-  // await page.click('.file-dialog-trigger')
-  // const input = await page.$('input[type="file"]')
-  await input.uploadFile('./content.csv');
+  const attachInput = await page.$('span[data-icon="attach-image"] +input[type=file][multiple]');
 
+  find.file('', folderShared, async (files) => {
+    for (let index = 0; index < files.length; index++) {
+      const filePath = files[index];
+      await attachInput.uploadFile(filePath);
+    }
+
+    await delay(3000);
+    await page.keyboard.press('Enter');
+  });    
 })();
 
-async function delay(time) {
+async function delay(time = 0) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
 
