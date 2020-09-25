@@ -3,8 +3,19 @@ const find = require('find');
 const puppeteer = require('puppeteer');
 
 const credentialsFile = 'credentials.json';
-const folderShared = 'E:\\projects\\docsF-photo2\\shared';
-const recipientsList = ['любимая', 'мама'];
+const recipientsList = {
+  names: [
+    {
+      name: 'любимая',
+      title: 'извини, тест!'
+    }, 
+    {
+      name: 'мама',
+      title: 'тест, извини!'
+    },
+  ],
+  sharedFolder: 'E:\\projects\\docsF-photo2\\shared',
+};
 
 (async () => {
   const browser = await puppeteer.launch({
@@ -38,8 +49,9 @@ const recipientsList = ['любимая', 'мама'];
   const searchInput = await page.$('label .copyable-text.selectable-text');    
   if (searchInput === null) return;
 
-  for (let recipIndex = 0; recipIndex < recipientsList.length; recipIndex++) {
-    const recipient = recipientsList[recipIndex];
+  const recipNames = recipientsList.names;
+  for (let recipIndex = 0; recipIndex < recipNames.length; recipIndex++) {
+    const recipient = recipNames[recipIndex];
     
     await delay(1000);
     await searchInput.click();
@@ -50,21 +62,20 @@ const recipientsList = ['любимая', 'мама'];
     await pressKeys(page, 'Control', 'A');
     await page.keyboard.press('Delete');
     await delay(300);
-    await page.keyboard.type(recipient);
+    await page.keyboard.type(recipient.name);
     await delay(3000);
     const matchedRow = await page.$('[style*="transform: translateY(72px)"');
     await matchedRow.click();
     await delay(1000);
     await pressKeys(page, 'Control', 'A');
     await page.keyboard.press('Delete');
-    await page.keyboard.type('извини, тест!');
+    await page.keyboard.type(recipient.title);
     const btnAttach = await page.$('div[role="button"][title="Attach"]');
     await btnAttach.click();
     await delay(1000);
     const attachInput = await page.$('span[data-icon="attach-image"] +input[type=file][multiple]');
-
     
-    find.file('', folderShared, async (files) => {
+    find.file('', recipientsList.sharedFolder, async (files) => {
       for (let index = 0; index < files.length; index++) {
         const filePath = files[index];
         await attachInput.uploadFile(filePath);
