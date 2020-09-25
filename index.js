@@ -4,6 +4,7 @@ const puppeteer = require('puppeteer');
 
 const credentialsFile = 'credentials.json';
 const folderShared = 'E:\\projects\\docsF-photo2\\shared';
+const recipientsList = ['любимая', 'мама'];
 
 (async () => {
   const browser = await puppeteer.launch({
@@ -31,33 +32,62 @@ const folderShared = 'E:\\projects\\docsF-photo2\\shared';
   }
   
   await saveLocalStorage(page, credentialsFile); 
+  
   await delay(10000);
-  const searchInput = await page.$('label .copyable-text.selectable-text'); // new Promise((r) => setTimeout(() => r(), 15000));
-  
-  if (searchInput === null) return;
-  
-  await searchInput.click();
-  await page.keyboard.type('любимая');
-  await delay(3000);
-  const matchedRow = await page.$('[style*="transform: translateY(72px)"');
-  await matchedRow.click();
-  await delay(1000);
-  await page.keyboard.type('извини, тест!');
-  const btnAttach = await page.$('div[role="button"][title="Attach"]');
-  await btnAttach.click();
-  await delay(1000);
-  const attachInput = await page.$('span[data-icon="attach-image"] +input[type=file][multiple]');
 
-  find.file('', folderShared, async (files) => {
-    for (let index = 0; index < files.length; index++) {
-      const filePath = files[index];
-      await attachInput.uploadFile(filePath);
-    }
+  const searchInput = await page.$('label .copyable-text.selectable-text');    
+  if (searchInput === null) return;
+
+  for (let recipIndex = 0; recipIndex < recipientsList.length; recipIndex++) {
+    const recipient = recipientsList[recipIndex];
+    
+    await delay(1000);
+    await searchInput.click();
+    await delay(300);
+    await searchInput.click();
+    await delay(300);
+
+    await pressKeys(page, 'Control', 'A');
+    await page.keyboard.press('Delete');
+    await delay(300);
+    await page.keyboard.type(recipient);
+    await delay(3000);
+    const matchedRow = await page.$('[style*="transform: translateY(72px)"');
+    await matchedRow.click();
+    await delay(1000);
+    await pressKeys(page, 'Control', 'A');
+    await page.keyboard.press('Delete');
+    await page.keyboard.type('извини, тест!');
+    const btnAttach = await page.$('div[role="button"][title="Attach"]');
+    await btnAttach.click();
+    await delay(1000);
+    const attachInput = await page.$('span[data-icon="attach-image"] +input[type=file][multiple]');
+
+    
+    find.file('', folderShared, async (files) => {
+      for (let index = 0; index < files.length; index++) {
+        const filePath = files[index];
+        await attachInput.uploadFile(filePath);
+      }
+    });
 
     await delay(3000);
     await page.keyboard.press('Enter');
-  });    
+  }    
 })();
+
+async function pressKeys(page, ...keys) {
+  for (let keyInd = 0; keyInd < keys.length; keyInd++) {
+    const key = keys[keyInd];
+    await page.keyboard.down(key);
+    await delay();
+  }
+  for (let keyInd = 0; keyInd < keys.length; keyInd++) {
+    const key = keys[keyInd];
+    await page.keyboard.up(key);
+    await delay();
+  }
+}
 
 async function delay(time = 0) {
   return new Promise((resolve) => setTimeout(resolve, time));
