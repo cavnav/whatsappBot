@@ -6,13 +6,21 @@ const credentialsFile = 'credentials.json';
 const recipientsList = {
   names: [
     {
-      name: 'любимая',
+      name: 'Любимая',
       title: 'извини, тест!'
     }, 
     {
-      name: 'мама',
+      name: 'Мама',
       title: 'тест, извини!'
     },
+    {
+      name: 'Мамао',
+      title: 'тест, не обращай!'
+    },
+    {
+      name: 'Минаев',
+      title: 'тестирую!'
+    }
   ],
   sharedFolder: 'E:\\projects\\docsF-photo2\\shared',
 };
@@ -64,8 +72,31 @@ const recipientsList = {
     await delay(300);
     await page.keyboard.type(recipient.name);
     await delay(3000);
-    const matchedRow = await page.$('[style*="transform: translateY(72px)"');
-    await matchedRow.click();
+    
+    const matchedRowId = await page.evaluate((recName) => new Promise((resolve) => {
+        const res = [...document.querySelectorAll(`span[title="${recName}"]`)].reduce((resE, e) => {
+          const top = e.getBoundingClientRect().top;
+            return (top < resE.top) ? ({ e, top }) : resE;
+          }, { top: 10000 });
+        
+        if (!res.e) resolve('');          
+        const matchedRowId = getCurMoment();        
+        res.e.setAttribute('matched-row', matchedRowId);
+        resolve(matchedRowId);
+        
+        function getCurMoment() {
+          const dateISO = new Date().toISOString();
+          return dateISO.slice(0, dateISO.indexOf('.')).replace(/:/g, '');
+        }
+      }),
+      recipient.name,
+    );
+
+    if (!matchedRowId) return;
+
+    const matchedRowWithId = await page.$(`span[matched-row="${matchedRowId}"]`);
+    await matchedRowWithId.click();
+
     await delay(1000);
     await pressKeys(page, 'Control', 'A');
     await page.keyboard.press('Delete');
@@ -83,7 +114,7 @@ const recipientsList = {
     });
 
     await delay(3000);
-    await page.keyboard.press('Enter');
+    // await page.keyboard.press('Enter');
   }    
 })();
 
