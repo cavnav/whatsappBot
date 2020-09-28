@@ -3,33 +3,19 @@ const find = require('find');
 const puppeteer = require('puppeteer');
 
 const credentialsFile = 'credentials.json';
-const recipientsList = {
-  names: [
-    {
-      name: 'Любимая',
-      title: 'извини, тест!'
-    }, 
-    {
-      name: 'Мама',
-      title: 'тест, извини!'
-    },
-    {
-      name: 'Мамао',
-      title: 'тест, не обращай!'
-    },
-    {
-      name: 'Минаев',
-      title: 'тестирую!'
-    }
-  ],
-  sharedFolder: 'E:\\projects\\docsF-photo2\\shared',
-};
 
 (async () => {
+  const recipientsList = await new Promise((resolve) => {
+    process.on('message', (params) => resolve(params));  
+  });
+
   const browser = await puppeteer.launch({
     headless: false,
     args: ['--start-maximized'],
   }); // default is true
+  
+  browser.on('disconnected', () => process.send(-1));
+
   const page = await browser.newPage();
   await page.goto('https://web.whatsapp.com');
   await restoreLocalStorage(page, credentialsFile);
@@ -115,7 +101,9 @@ const recipientsList = {
 
     await delay(3000);
     // await page.keyboard.press('Enter');
-  }    
+  } 
+
+  await browser.close();
 })();
 
 async function pressKeys(page, ...keys) {
