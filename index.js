@@ -104,6 +104,7 @@ const credentialsFile = 'credentials.json';
   } 
 
   await browser.close();
+  process.exit(0);
 })();
 
 async function pressKeys(page, ...keys) {

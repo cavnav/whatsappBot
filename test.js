@@ -36,4 +36,4 @@ child.on('exit', (code, signal) => {
   console.log('exit', code, signal);
 });
 
-child.unref();
+// child.unref();
