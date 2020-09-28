@@ -38,9 +38,7 @@ const credentialsFile = 'credentials.json';
   
   await saveLocalStorage(page, credentialsFile); 
   
-  await delay(10000);
-
-  const searchInput = await page.$('label .copyable-text.selectable-text');    
+  const searchInput = await page.waitForSelector('label .copyable-text.selectable-text', { timeout: 15000 });    
   if (searchInput === null) return;
 
   const recipNames = recipientsList.names;
