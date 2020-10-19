@@ -14,8 +14,8 @@ const credentialsFile = 'credentials.json';
     args: ['--start-maximized'],
   }); // default is true
   
-  browser.on('disconnected', () => process.send(-1));
-
+  // browser.on('disconnected', () => process.send(-1));
+  
   const page = await browser.newPage();
   await page.goto('https://web.whatsapp.com');
   await restoreLocalStorage(page, credentialsFile);
